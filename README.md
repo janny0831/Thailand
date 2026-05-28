@@ -67,7 +67,7 @@
                             <th class="py-3 px-4 font-bold text-center w-32">天數<br><span class="text-xs font-normal text-gray-400">จำนวนวัน</span></th>
                             <th class="py-3 px-4 font-bold text-center w-36">每日小時<br><span class="text-xs font-normal text-gray-400">ชั่วโมง/วัน</span></th>
                             <th class="py-3 px-4 font-bold text-right w-40">加班費金額<br><span class="text-xs font-normal text-gray-400">ค่าล่วงเวลา</span></th>
-                            <th class="py-3 px-4 font-bold text-right w-44">獎金 (中餐/宵夜)<br><span class="text-xs font-normal text-gray-400">โบนัสอาหาร</span></th>
+                            <th class="py-3 px-4 font-bold text-right w-52">獎金 (中餐/晚餐/宵夜)<br><span class="text-xs font-normal text-gray-400">โบนัสอาหาร</span></th>
                             <th class="py-3 px-4 font-bold text-right w-40">項目小計<br><span class="text-xs font-normal text-gray-400">รวมรายวัน</span></th>
                             <th class="py-3 px-4 font-bold text-center w-28">操作<br><span class="text-xs font-normal text-gray-400">จัดการ</span></th>
                         </tr>
@@ -101,7 +101,7 @@
 
                     <!-- 總獎金 -->
                     <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
-                        <div class="text-sm font-bold text-gray-500">總獎金加總 (中餐+宵夜)</div>
+                        <div class="text-sm font-bold text-gray-500">總獎金加總</div>
                         <div class="text-xs text-gray-400">รวมโบนัสทั้งหมด</div>
                         <div class="text-2xl font-bold text-orange-500 font-mono mt-1">$ <span id="globalBonus">0</span></div>
                     </div>
@@ -119,16 +119,21 @@
             <!-- Rules & Explanation -->
             <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 text-xs text-gray-500 leading-relaxed space-y-2">
                 <p class="font-bold text-gray-700">計算規則標準說明 / รายละเอียดกฎเกณฑ์ :</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <p><strong>平日加班規則 (วันธรรมดา):</strong><br>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p class="space-y-1">
+                        <strong class="text-gray-800">平日加班規則 (วันธรรมดา):</strong><br>
                         - 第 1~2 小時：時薪 × 1.33<br>
                         - 第 3 小時起：時薪 × 1.66<br>
-                        - 加班滿 5 小時或以上：加發 100 宵夜獎金 (ค่าอาหารดึก)
+                        - <span class="text-indigo-600 font-medium">加班滿 2 小時或以上（含 2 小時）：加發 100 晚餐獎金 (ค่าอาหารเย็น)</span><br>
+                        - 加班滿 5 小時或以上：再加發 100 宵夜獎金 (共 200) (ค่าอาหารเย็น + อาหารดึก รวม 200)
                     </p>
-                    <p><strong>假日加班規則 (วันหยุด):</strong><br>
+                    <p class="space-y-1">
+                        <strong class="text-gray-800">假日加班規則 (วันหยุด):</strong><br>
                         - 第 1~2 小時：時薪 × 1.33<br>
                         - 第 3 小時起：時薪 × 1.67<br>
-                        - 加班滿 5 小時或以上：加發 100 中餐獎金 (ค่าอาหารกลางวัน)
+                        - 加班滿 5 小時或以上：加發 100 中餐獎金 (ค่าอาหารกลางวัน)<br>
+                        - <span class="text-indigo-600 font-medium">加班滿 10 小時或以上（含 10 小時）：再加發 100 晚餐獎金 (共 200) (ค่าอาหารกลางวัน + อาหารเย็น รวม 200)</span><br>
+                        - 加班滿 13 小時或以上：再加發 100 宵夜獎金 (共 300) (ค่าอาหารกลางวัน + อาหารเย็น + อาหารดึก รวม 300)
                     </p>
                 </div>
             </div>
@@ -144,9 +149,6 @@
         window.onload = function() {
             // 綁定薪資輸入事件
             document.getElementById('baseSalary').addEventListener('input', calculateAll);
-            
-            // 已移除預設載入資料，保持完全空白。
-            // 使用者點擊「新增加班項目」按鈕即可新增項目。
         };
 
         // 新增一行加班計算
@@ -300,32 +302,48 @@
 
                 let dailyOtPay = 0;
                 let dailyBonus = 0;
-                let bonusLabel = '-';
+                let bonusParts = [];
 
                 if (type === 'weekday') {
-                    // 平日加班
+                    // 平日加班費計算
                     if (hours > 0) {
                         if (hours <= 2) {
                             dailyOtPay = hours * hourlyWage * 1.33;
                         } else {
                             dailyOtPay = (2 * hourlyWage * 1.33) + ((hours - 2) * hourlyWage * 1.66);
                         }
+
+                        // 平日獎金判斷
+                        if (hours >= 2) { // <-- 門檻已更新為包含 2 小時 (hours >= 2)
+                            dailyBonus += 100; // 晚餐 100
+                            bonusParts.push("晚餐 (อาหารเย็น)");
+                        }
                         if (hours >= 5) {
-                            dailyBonus = 100;
-                            bonusLabel = '宵夜獎金 (ค่าอาหารดึก)';
+                            dailyBonus += 100; // 宵夜 100
+                            bonusParts.push("宵夜 (อาหารดึก)");
                         }
                     }
                 } else {
-                    // 假日加班
+                    // 假日加班費計算
                     if (hours > 0) {
                         if (hours <= 2) {
                             dailyOtPay = hours * hourlyWage * 1.33;
                         } else {
                             dailyOtPay = (2 * hourlyWage * 1.33) + ((hours - 2) * hourlyWage * 1.67);
                         }
+                        
+                        // 假日獎金判斷
                         if (hours >= 5) {
-                            dailyBonus = 100;
-                            bonusLabel = '中餐獎金 (ค่าอาหารกลางวัน)';
+                            dailyBonus += 100; // 中餐 100
+                            bonusParts.push("中餐 (อาหารกลางวัน)");
+                        }
+                        if (hours >= 10) { // <-- 門檻已更新為包含 10 小時 (hours >= 10)
+                            dailyBonus += 100; // 晚餐 100
+                            bonusParts.push("晚餐 (อาหารเย็น)");
+                        }
+                        if (hours >= 13) {
+                            dailyBonus += 100; // 宵夜 100
+                            bonusParts.push("宵夜 (อาหารดึก)");
                         }
                     }
                 }
@@ -337,10 +355,12 @@
                 totalGlobalOtPay += totalOtPay;
                 totalGlobalBonus += totalBonus;
 
+                const bonusLabelText = bonusParts.length > 0 ? bonusParts.join(" + ") : "-";
+
                 // 渲染桌機版數值與標籤
                 document.getElementById(`otDisplay-${id}`).innerText = totalOtPay.toLocaleString();
                 document.getElementById(`bonusDisplay-${id}`).innerText = totalBonus.toLocaleString();
-                document.getElementById(`bonusLabel-${id}`).innerText = bonusLabel;
+                document.getElementById(`bonusLabel-${id}`).innerText = bonusLabelText;
                 document.getElementById(`rowTotalDisplay-${id}`).innerText = rowTotal.toLocaleString();
 
                 // 同步更新手機版數值與欄位值
