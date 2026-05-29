@@ -63,8 +63,8 @@
                 </div>
                 <!-- Quick Salary Suggestion Buttons for Fast Mobile Tapping -->
                 <div class="flex gap-2 mt-3 overflow-x-auto pb-1">
-                    <button type="button" onclick="quickSetSalary(28590)" class="btn-active-scale transition-all flex-shrink-0 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100 text-slate-600 text-xs px-3 py-1.5 rounded-lg border border-transparent font-medium">
-                        $28,590 (基本薪)
+                    <button type="button" onclick="quickSetSalary(29500)" class="btn-active-scale transition-all flex-shrink-0 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100 text-slate-600 text-xs px-3 py-1.5 rounded-lg border border-transparent font-medium">
+                        $29,500 (基本薪)
                     </button>
                     <button type="button" onclick="quickSetSalary(30000)" class="btn-active-scale transition-all flex-shrink-0 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100 text-slate-600 text-xs px-3 py-1.5 rounded-lg border border-transparent font-medium">
                         $30,000
